@@ -3,7 +3,7 @@ import Options from "./Options/Options";
 import Feedback from "./Feedback/Feedback";
 import Notification from "./Notification/Notification";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
   const [state, setState] = useState(() => {
@@ -17,6 +17,9 @@ function App() {
       bad: 0,
     };
   });
+  useEffect(() => {
+    localStorage.setItem("feedbackState", JSON.stringify(state));
+  }, [state]);
   const updateFeedback = function (type) {
     if (type === "reset") {
       setState({
@@ -31,13 +34,6 @@ function App() {
       ...prevState,
       [type]: prevState[type] + 1,
     }));
-    localStorage.setItem(
-      "feedbackState",
-      JSON.stringify({
-        ...state,
-        [type]: state[type] + 1,
-      })
-    );
     return;
   };
   const totalFeedback = state.good + state.neutral + state.bad;
@@ -48,7 +44,11 @@ function App() {
       {totalFeedback === 0 ? (
         <Notification message="No feedback yet" />
       ) : (
-        <Feedback state={state} totalFeedback={totalFeedback} />
+        <Feedback
+          state={state}
+          totalFeedback={totalFeedback}
+          positiveFeedback={Math.round((state.good / totalFeedback) * 100)}
+        />
       )}
     </>
   );
